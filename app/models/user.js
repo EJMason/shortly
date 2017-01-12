@@ -7,7 +7,7 @@ const bcrypt = require('bcrypt-nodejs');
 const Promise = require('bluebird');
 
 var encrypt = Promise.promisify(bcrypt.hash);
-
+var auth = Promise.promisify(bcrypt.compare);
 //------------------------------------------------
 //             SCHEMA / MIDDLEWARE
 //------------------------------------------------
@@ -31,13 +31,13 @@ usersSchema.pre('save', function(next){
 //------------------------------------------------
 //                    MODELS
 //------------------------------------------------
-var User = mongoose.model('User', usersSchema);
+const User = mongoose.model('User', usersSchema);
 
 //------------------------------------------------
 //                    HELPERS
 //------------------------------------------------
 const addUser = (user, pass) => {
-  var newUser = new User({username: user, password: pass});
+  let newUser = new User({username: user, password: pass});
   newUser.save()
   .then(user => {
     console.log('\nUser created!');
@@ -62,5 +62,19 @@ const checkUser = username => {
   });
 };
 
+//var userFindOne = Promise.promisify(User.findOne);
+
+const authenticate = (username, password) => {
+  return new Promise ((resolve, reject) => {
+    User.findOne({'username': username}, 'password', (err, hash) => {
+      auth(password, hash.password).then((isCorrect) => {
+        console.log('Password entered correctly!');
+        resolve(isCorrect);
+      });
+    });
+  });
+};
+
 module.exports.addUser = addUser;
 module.exports.checkUser = checkUser;
+module.exports.authenticate = authenticate;

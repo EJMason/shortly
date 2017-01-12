@@ -27,110 +27,24 @@ app.use(session({
 //------------------------------------------------
 //                    REST
 //------------------------------------------------
-app.get('/test', (req, res) => {
-  res.status(200).send(mongo.Links.find());
-});
 
 app.post('/test', (req, res) => {
   var data = req.body;
-
-  user.addUser(data.username, data.password);
-  res.status(200).send('User Created!');
+  console.log(req.headers.origin)
+  link.addLink(data.url, req.headers.origin);
+  res.status(200).send('Link Created!');
 });
 
-app.get('/', util.checkUser, function(req, res) {
+app.get('/', util.checkUser, (req, res) => {
   res.render('index');
 });
 
-app.get('/create', util.checkUser, function(req, res) {
+app.get('/create', util.checkUser, (req, res) => {
   res.render('index');
 });
 
-//--------------------> REFACTOR ALERT!!!!! ------------------>
-
-app.get('/links', util.checkUser, function(req, res) {
-  res.status(200).send(mongo.Links.find());
-  // Links.reset().fetch().then(function(links) {
-  //   res.status(200).send(links.models);
-  // });
-});
-
-//--------------------> REFACTOR ALERT!!!!! ------------------>
-app.post('/links', util.checkUser, function(req, res) {
-  var uri = req.body.url;
-
-  if (!util.isValidUrl(uri)) {
-    console.log('Not a valid url: ', uri);
-    return res.sendStatus(404);
-  }
-
-  new Link({ url: uri }).fetch().then(function(found) {
-    if (found) {
-      res.status(200).send(found.attributes);
-    } else {
-      util.getUrlTitle(uri, function(err, title) {
-        if (err) {
-          console.log('Error reading URL heading: ', err);
-          return res.sendStatus(404);
-        }
-
-        Links.create({
-          url: uri,
-          title: title,
-          baseUrl: req.headers.origin
-        })
-        .then(function(newLink) {
-          res.status(200).send(newLink);
-        });
-      });
-    }
-  });
-});
-
-/************************************************************/
-// Write your authentication routes here
-/************************************************************/
-
-
-app.get('/login', function(req, res) {
+app.get('/login', (req, res) => {
   res.render('login');
-});
-
-//--------------------> REFACTOR ALERT!!!!! ------------------>
-app.post('/login', function(req, res) {
-  var username = req.body.username;
-  var password = req.body.password;
-
-  new User({ username: username })
-    .fetch()
-    .then(function(user) {
-      if (!user) {
-        res.redirect('/login');
-      } else {
-        // BASIC VERSION
-        // bcrypt.compare(password, user.get('password'), function(err, match) {
-        //   if (match) {
-        //     util.createSession(req, res, user);
-        //   } else {
-        //     res.redirect('/login');
-        //   }
-        // });
-        // ADVANCED VERSION -- see user model
-        user.comparePassword(password, function(match) {
-          if (match) {
-            util.createSession(req, res, user);
-          } else {
-            res.redirect('/login');
-          }
-        });
-      }
-    });
-});
-
-app.get('/logout', function(req, res) {
-  req.session.destroy(function() {
-    res.redirect('/login');
-  });
 });
 
 app.get('/signup', function(req, res) {
@@ -138,11 +52,68 @@ app.get('/signup', function(req, res) {
 });
 
 //--------------------> REFACTOR ALERT!!!!! ------------------>
+
+app.get('/links', util.checkUser, (req, res) => {
+  link.allLinks()
+  .then(links => {
+    res.status(200).send(links.allLinks());
+  })
+  .catch(err => {
+    res.sendStatus(404);
+  });
+});
+
+//--------------------> REFACTOR ALERT!!!!! ------------------>
+app.post('/links', util.checkUser, (req, res) => {
+  var uri = req.body.url;
+  var base = req.headers.origin;
+
+
+  if (!util.isValidUrl(uri)) {
+    console.log('Not a valid url: ', uri);
+    return res.sendStatus(404);
+  }
+  console.log('=================================================')
+  link.addLink(uri, base);
+  res.status(200).send('Link Created!');
+});
+
+/************************************************************/
+// Write your authentication routes here
+/************************************************************/
+
+app.post('/login', (req, res) => {
+  var username = req.body.username;
+  var password = req.body.password;
+
+  user.checkUser(username).then( exists => {
+    if(exists) {
+      user.authenticate(username, password).then(isCorrect => {
+        if(isCorrect){
+          util.createSession(req, res, username);
+        } else {
+          console.log('Username or Password incorrect.');
+          res.redirect('/login');
+        }
+      });
+    } else {
+      console.log('Username or Password incorrect.');
+      res.redirect('/login');
+    }
+  });
+});
+
+app.get('/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.redirect('/login');
+  });
+});
+
 app.post('/signup', function(req, res) {
   var username = req.body.username;
   var password = req.body.password;
 
-  user.checkUser(username).then((isTaken) =>{
+  user.checkUser(username).then(isTaken =>{
     if(isTaken) {
       console.log('Account already exists');
       res.redirect('/signup');
@@ -159,8 +130,8 @@ app.post('/signup', function(req, res) {
 // If the short-code doesn't exist, send the user to '/'
 /************************************************************/
 
-app.get('/*', function(req, res) {
-  new Link({ code: req.params[0] }).fetch().then(function(link) {
+app.get('/*', (req, res) => {
+  new Link({ code: req.params[0] }).fetch().then( link => {
     if (!link) {
       res.redirect('/');
     } else {
@@ -168,9 +139,9 @@ app.get('/*', function(req, res) {
         linkId: link.get('id')
       });
 
-      click.save().then(function() {
+      click.save().then(() => {
         link.set('visits', link.get('visits') + 1);
-        link.save().then(function() {
+        link.save().then(() => {
           return res.redirect(link.get('url'));
         });
       });
