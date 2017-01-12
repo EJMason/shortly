@@ -46,6 +46,8 @@ app.get('/create', util.checkUser, function(req, res) {
   res.render('index');
 });
 
+//--------------------> REFACTOR ALERT!!!!! ------------------>
+
 app.get('/links', util.checkUser, function(req, res) {
   res.status(200).send(mongo.Links.find());
   // Links.reset().fetch().then(function(links) {
@@ -53,6 +55,7 @@ app.get('/links', util.checkUser, function(req, res) {
   // });
 });
 
+//--------------------> REFACTOR ALERT!!!!! ------------------>
 app.post('/links', util.checkUser, function(req, res) {
   var uri = req.body.url;
 
@@ -93,6 +96,7 @@ app.get('/login', function(req, res) {
   res.render('login');
 });
 
+//--------------------> REFACTOR ALERT!!!!! ------------------>
 app.post('/login', function(req, res) {
   var username = req.body.username;
   var password = req.body.password;
@@ -133,6 +137,7 @@ app.get('/signup', function(req, res) {
   res.render('signup');
 });
 
+//--------------------> REFACTOR ALERT!!!!! ------------------>
 app.post('/signup', function(req, res) {
   var username = req.body.username;
   var password = req.body.password;
