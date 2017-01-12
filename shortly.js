@@ -4,9 +4,9 @@ var partials = require('express-partials');
 var bodyParser = require('body-parser');
 var session = require('express-session');
 
-var mongo = require('./app/config');
-var User = require('./app/models/user');
-var Link = require('./app/models/link');
+var con = require('./app/config');
+var user = require('./app/models/user');
+var link = require('./app/models/link');
 
 var app = express();
 
@@ -34,7 +34,7 @@ app.get('/test', (req, res) => {
 app.post('/test', (req, res) => {
   var data = req.body;
 
-  User.addUser(data.username, data.password);
+  user.addUser(data.username, data.password);
   res.status(200).send('User Created!');
 });
 
@@ -142,33 +142,15 @@ app.post('/signup', function(req, res) {
   var username = req.body.username;
   var password = req.body.password;
 
-  new User({ username: username })
-    .fetch()
-    .then(function(user) {
-      if (!user) {
-        // BASIC VERSION
-        // bcrypt.hash(password, null, null, function(err, hash) {
-        //   Users.create({
-        //     username: username,
-        //     password: hash
-        //   }).then(function(user) {
-        //       util.createSession(req, res, user);
-        //   });
-        // });
-        // ADVANCED VERSION -- see user model
-        var newUser = new User({
-          username: username,
-          password: password
-        });
-        newUser.save()
-          .then(function(newUser) {
-            util.createSession(req, res, newUser);
-          });
-      } else {
-        console.log('Account already exists');
-        res.redirect('/signup');
-      }
-    });
+  user.checkUser(username).then((isTaken) =>{
+    if(isTaken) {
+      console.log('Account already exists');
+      res.redirect('/signup');
+    } else {
+      user.addUser(username, password);
+      util.createSession(req, res, username);
+    }
+  });
 });
 
 /************************************************************/
@@ -197,7 +179,7 @@ app.get('/*', function(req, res) {
 });
 //this is a comment!
 console.log('Shortly is listening on 4568');
-mongo.connection.once('open', () => {
+con.connection.once('open', () => {
    app.listen(4568);
 })
 

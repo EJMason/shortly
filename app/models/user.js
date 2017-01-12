@@ -36,7 +36,7 @@ var User = mongoose.model('User', usersSchema);
 //------------------------------------------------
 //                    HELPERS
 //------------------------------------------------
-const addUser = (user, pass, res) => {
+const addUser = (user, pass) => {
   var newUser = new User({username: user, password: pass});
   newUser.save()
   .then(user => {
@@ -49,4 +49,18 @@ const addUser = (user, pass, res) => {
   });
 };
 
+const checkUser = username => {
+  return new Promise((resolve, reject) => {
+    User.count({'username': username}, (err, count) => {
+      if(count > 0){
+        resolve(true);
+      }
+      else{
+        resolve(false);
+      }
+    })
+  });
+};
+
 module.exports.addUser = addUser;
+module.exports.checkUser = checkUser;
