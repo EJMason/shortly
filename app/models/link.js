@@ -50,7 +50,6 @@ var Link = mongoose.model('Link', linkSchema);
 //                    HELPERS
 //------------------------------------------------
 const addLink = (uri, basePath) => {
-  console.log('THIS IS THE FUCKING BASE:  ' + basePath);
   let newLink = new Link({url: uri, baseUrl: basePath});
   newLink.save()
   .then((link) => {
@@ -65,11 +64,12 @@ const addLink = (uri, basePath) => {
 
 const allLinks = () => {
   return new Promise((resolve, reject) => {
-    Links
-    .find({})
-    .sort('-title')
-    .exec(resolve(allLinks));
+    Link.find({},(err, docs) => {
+      console.log('Here are the docs: ' + docs);
+      resolve(docs);
+    });
   });
 };
 
 module.exports.addLink = addLink;
+module.exports.allLinks = allLinks;

@@ -51,29 +51,24 @@ app.get('/signup', function(req, res) {
   res.render('signup');
 });
 
-//--------------------> REFACTOR ALERT!!!!! ------------------>
-
 app.get('/links', util.checkUser, (req, res) => {
-  link.allLinks()
-  .then(links => {
-    res.status(200).send(links.allLinks());
+  link.allLinks().then( links => {
+    res.status(200).send(links);
   })
   .catch(err => {
+    console.log(err)
     res.sendStatus(404);
   });
 });
 
-//--------------------> REFACTOR ALERT!!!!! ------------------>
 app.post('/links', util.checkUser, (req, res) => {
   var uri = req.body.url;
   var base = req.headers.origin;
-
 
   if (!util.isValidUrl(uri)) {
     console.log('Not a valid url: ', uri);
     return res.sendStatus(404);
   }
-  console.log('=================================================')
   link.addLink(uri, base);
   res.status(200).send('Link Created!');
 });
@@ -130,25 +125,24 @@ app.post('/signup', function(req, res) {
 // If the short-code doesn't exist, send the user to '/'
 /************************************************************/
 
-app.get('/*', (req, res) => {
-  new Link({ code: req.params[0] }).fetch().then( link => {
-    if (!link) {
-      res.redirect('/');
-    } else {
-      var click = new Click({
-        linkId: link.get('id')
-      });
+// app.get('/*', (req, res) => {
+//   new Link({ code: req.params[0] }).fetch().then( link => {
+//     if (!link) {
+//       res.redirect('/');
+//     } else {
+//       var click = new Click({
+//         linkId: link.get('id')
+//       });
 
-      click.save().then(() => {
-        link.set('visits', link.get('visits') + 1);
-        link.save().then(() => {
-          return res.redirect(link.get('url'));
-        });
-      });
-    }
-  });
-});
-//this is a comment!
+//       click.save().then(() => {
+//         link.set('visits', link.get('visits') + 1);
+//         link.save().then(() => {
+//           return res.redirect(link.get('url'));
+//         });
+//       });
+//     }
+//   });
+// });
 console.log('Shortly is listening on 4568');
 con.connection.once('open', () => {
    app.listen(4568);
