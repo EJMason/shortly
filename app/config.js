@@ -1,6 +1,8 @@
+//database uses mlab.com
 const mongoose = require('mongoose');
+const keys = require('./../keys');
 
-const uri = 'mongodb://ejmason:4808@ds159998.mlab.com:59998/shortly';
+const uri = 'mongodb://' + keys.username + ':' + keys.password +'@ds159998.mlab.com:59998/shortly';
 var options = {
   server: {
     socketOptions: {
@@ -19,21 +21,6 @@ var options = {
 
 mongoose.connect(uri, options);
 var conn = mongoose.connection;
-
-// var Link = mongoose.model('Link', linkSchema);
-
-/*
-------------------------------------------------
-              Middleware
-------------------------------------------------
-
-
-/*
-------------------------------------------------
-              HELPERS
-------------------------------------------------
-*/
-
 
 module.exports.connection = conn;
 

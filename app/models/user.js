@@ -40,7 +40,9 @@ const addUser = (user, pass, res) => {
   var newUser = new User({username: user, password: pass});
   newUser.save()
   .then(user => {
-    console.log('User created success!');
+    console.log('\nUser created!');
+    console.log('Username: ' + user.username);
+    console.log('Pass: ' + user.password);
   })
   .catch(err => {
     console.log(err);

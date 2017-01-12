@@ -2,24 +2,19 @@ var express = require('express');
 var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
-
 var session = require('express-session');
 
 var mongo = require('./app/config');
-// var Users = require('./app/collections/users');
 var User = require('./app/models/user');
-// var Links = require('./app/collections/links');
 var Link = require('./app/models/link');
-//var Click = require('./app/models/click');
 
 var app = express();
 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 app.use(partials());
-// Parse JSON (uniform resource locators)
+
 app.use(bodyParser.json());
-// Parse forms (signup/login)
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
 
@@ -29,14 +24,18 @@ app.use(session({
   saveUninitialized: true
 }));
 
+//------------------------------------------------
+//                    REST
+//------------------------------------------------
 app.get('/test', (req, res) => {
   res.status(200).send(mongo.Links.find());
 });
+
 app.post('/test', (req, res) => {
   var data = req.body;
 
   User.addUser(data.username, data.password);
-  res.status(200).send('User sent to Database!');
+  res.status(200).send('User Created!');
 });
 
 app.get('/', util.checkUser, function(req, res) {
