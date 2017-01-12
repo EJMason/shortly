@@ -1,12 +1,29 @@
 const mongoose = require('mongoose');
-var uniqueValidator = require('mongoose-unique-validator');
+const uniqueValidator = require('mongoose-unique-validator');
 const bcrypt = require('bcrypt-nodejs');
 const assert = require('assert');
 const Promise = require('bluebird');
 const Schema = mongoose.Schema;
 
-const uri = 'mongodb://localhost/shortly';
-mongoose.connect(uri);
+const uri = 'mongodb://ejmason:4808@ds159998.mlab.com:59998/shortly';
+var options = {
+  server: {
+    socketOptions: {
+      keepAlive: 300000,
+      connectTimeoutMS: 30000
+    }
+  },
+  replset: {
+    socketOptions:
+    {
+      keepAlive: 300000,
+      connectTimeoutMS : 30000
+    }
+  }
+};
+mongoose.connect(uri, options);
+var conn = mongoose.connection;
+
 
 mongoose.Promise = require('bluebird');
 var decrypt = Promise.promisify(bcrypt.compare);
@@ -29,7 +46,7 @@ var linkSchema = new Schema({
 var usersSchema = new Schema({
   username: {
     type: String,
-    unique:true
+    unique: true
   },
   password: String
 });
@@ -52,13 +69,10 @@ var Link = mongoose.model('Link', linkSchema);
 usersSchema.pre('save', function(next){
   let user = this;
   encrypt(user.password, null, null).then((secret) =>{
-    console.log(secret);
     user.password = secret;
     next();
   });
 });
-
-
 
 /*
 ------------------------------------------------
@@ -70,15 +84,15 @@ const addUser = (user, pass, res) => {
   var newUser = new User({username: user, password: pass});
   newUser.save()
   .then(user => {
-    console.log('password: ' + user.password);
+    console.log('User created success!');
   })
   .catch(err => {
-    console.log(err.errors.username.message);
+    console.log(err);
   });
 };
 
 module.exports.User = User;
 module.exports.Link = Link;
 module.exports.addUser = addUser;
-
+module.exports.connection = conn;
 

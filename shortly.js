@@ -10,7 +10,7 @@ var Users = require('./app/collections/users');
 var User = require('./app/models/user');
 var Links = require('./app/collections/links');
 var Link = require('./app/models/link');
-var Click = require('./app/models/click');
+//var Click = require('./app/models/click');
 
 var app = express();
 
@@ -35,7 +35,7 @@ app.get('/test', (req, res) => {
 app.post('/test', (req, res) => {
   var data = req.body;
 
-  mongo.addUser(data.username, data.password, res);
+  mongo.addUser(data.username, data.password);
   res.status(200).send('Hello!');
 });
 
@@ -193,4 +193,7 @@ app.get('/*', function(req, res) {
 });
 //this is a comment!
 console.log('Shortly is listening on 4568');
-app.listen(4568);
+mongo.connection.once('open', () => {
+   app.listen(4568);
+})
+

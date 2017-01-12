@@ -1,4 +1,4 @@
-// //var schema = require('../config');
+//var schema = require('../config');
 // var Click = require('./click');
 // var crypto = require('crypto');
 
