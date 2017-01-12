@@ -5,7 +5,7 @@ var bodyParser = require('body-parser');
 
 var session = require('express-session');
 
-var db = require('./app/config');
+var mongo = require('./app/config');
 var Users = require('./app/collections/users');
 var User = require('./app/models/user');
 var Links = require('./app/collections/links');
@@ -29,6 +29,16 @@ app.use(session({
   saveUninitialized: true
 }));
 
+app.get('/test', (req, res) => {
+  res.status(200).send(mongo.Links.find());
+});
+app.post('/test', (req, res) => {
+  var data = req.body;
+
+  mongo.addUser(data.username, data.password, res);
+  res.status(200).send('Hello!');
+});
+
 app.get('/', util.checkUser, function(req, res) {
   res.render('index');
 });
@@ -38,9 +48,10 @@ app.get('/create', util.checkUser, function(req, res) {
 });
 
 app.get('/links', util.checkUser, function(req, res) {
-  Links.reset().fetch().then(function(links) {
-    res.status(200).send(links.models);
-  });
+  res.status(200).send(mongo.Links.find());
+  // Links.reset().fetch().then(function(links) {
+  //   res.status(200).send(links.models);
+  // });
 });
 
 app.post('/links', util.checkUser, function(req, res) {

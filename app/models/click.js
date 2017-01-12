@@ -1,12 +1,12 @@
-var db = require('../config');
-var Link = require('./link.js');
+// //var db = require('../config');
+// var Link = require('./link.js');
 
-var Click = db.Model.extend({
-  tableName: 'clicks',
-  hasTimestamps: true,
-  link: function() {
-    return this.belongsTo(Link, 'linkId');
-  }
-});
+// var Click = db.Model.extend({
+//   tableName: 'clicks',
+//   hasTimestamps: true,
+//   link: function() {
+//     return this.belongsTo(Link, 'linkId');
+//   }
+// });
 
-module.exports = Click;
+// module.exports = Click;
