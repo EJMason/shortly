@@ -1,21 +1,50 @@
-// const Promise = require('bluebird');
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+mongoose.Promise = require('bluebird');
 
-// var db = require('../config');
-// var schema = require('../collections/users');
+const uniqueValidator = require('mongoose-unique-validator');
+const bcrypt = require('bcrypt-nodejs');
+const Promise = require('bluebird');
 
-// var User = db.mongoose.model('User', schema.usersSchema);
+var encrypt = Promise.promisify(bcrypt.hash);
 
-// var addUser = (user, pass) => {
-//   var newUser = new User({username: user, password: pass});
-//   newUser.save()
-//   .then(user => {
-//     console.log('password: ' + user.password);
-//   })
-//   .catch(err => {
-//     console.log(err);
-//     //console.log(err.errors.username.message);
-//   });
-// };
+//------------------------------------------------
+//             SCHEMA / MIDDLEWARE
+//------------------------------------------------
+var usersSchema = new Schema({
+  username: {
+    type: String,
+    unique: true
+  },
+  password: String
+});
+usersSchema.plugin(uniqueValidator);
 
-// module.exports.addUser = addUser;
+usersSchema.pre('save', function(next){
+  let user = this;
+  encrypt(user.password, null, null).then((secret) =>{
+    user.password = secret;
+    next();
+  });
+});
 
+//------------------------------------------------
+//                    MODELS
+//------------------------------------------------
+var User = mongoose.model('User', usersSchema);
+
+//------------------------------------------------
+//                    HELPERS
+//------------------------------------------------
+const addUser = (user, pass, res) => {
+  var newUser = new User({username: user, password: pass});
+  newUser.save()
+  .then(user => {
+    console.log('User created success!');
+  })
+  .catch(err => {
+    console.log(err);
+  });
+};
+
+module.exports.addUser = addUser;

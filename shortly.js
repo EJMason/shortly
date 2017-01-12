@@ -6,9 +6,9 @@ var bodyParser = require('body-parser');
 var session = require('express-session');
 
 var mongo = require('./app/config');
-var Users = require('./app/collections/users');
+// var Users = require('./app/collections/users');
 var User = require('./app/models/user');
-var Links = require('./app/collections/links');
+// var Links = require('./app/collections/links');
 var Link = require('./app/models/link');
 //var Click = require('./app/models/click');
 
@@ -35,8 +35,8 @@ app.get('/test', (req, res) => {
 app.post('/test', (req, res) => {
   var data = req.body;
 
-  mongo.addUser(data.username, data.password);
-  res.status(200).send('Hello!');
+  User.addUser(data.username, data.password);
+  res.status(200).send('User sent to Database!');
 });
 
 app.get('/', util.checkUser, function(req, res) {
