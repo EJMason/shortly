@@ -125,26 +125,33 @@ app.post('/signup', function(req, res) {
 // If the short-code doesn't exist, send the user to '/'
 /************************************************************/
 
-// app.get('/*', (req, res) => {
-//   new Link({ code: req.params[0] }).fetch().then( link => {
-//     if (!link) {
-//       res.redirect('/');
-//     } else {
-//       var click = new Click({
-//         linkId: link.get('id')
-//       });
+app.get('/*', (req, res) => {
+  link.clickLink(req.params[0])
+  .then((obj) =>{
+    return res.redirect(obj.url);
+  });
+  //res.status(200).send('THIS IS HERE!');
 
-//       click.save().then(() => {
-//         link.set('visits', link.get('visits') + 1);
-//         link.save().then(() => {
-//           return res.redirect(link.get('url'));
-//         });
-//       });
-//     }
-//   });
-// });
-console.log('Shortly is listening on 4568');
+  // new Link({ code: req.params[0] }).fetch().then( link => {
+  //   if (!link) {
+  //     res.redirect('/');
+  //   } else {
+  //     var click = new Click({
+  //       linkId: link.get('id')
+  //     });
+
+  //     click.save().then(() => {
+  //       link.set('visits', link.get('visits') + 1);
+  //       link.save().then(() => {
+  //         return res.redirect(link.get('url'));
+  //       });
+  //     });
+  //   }
+  // });
+});
+
 con.connection.once('open', () => {
-   app.listen(4568);
+  console.log('Shortly is listening on 4568');
+  app.listen(4568);
 })
 

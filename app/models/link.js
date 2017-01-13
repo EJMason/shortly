@@ -11,7 +11,10 @@ const util = require('./../../lib/utility');
 //             SCHEMA / MIDDLEWARE
 //------------------------------------------------
 var clicksSchema = new Schema({
-  timestamp: Date
+  timestamp: {
+    type: Date,
+    default: Date.now()
+  }
 });
 
 var linkSchema = new Schema({
@@ -24,7 +27,10 @@ var linkSchema = new Schema({
     default: 0
   },
   clicks:[clicksSchema],
-  timestamp: Date
+  timestamp: {
+    type: Date,
+    default: Date.now()
+  }
 });
 
 linkSchema.pre('save', function(next) {
@@ -39,6 +45,11 @@ linkSchema.pre('save', function(next) {
   }).catch(err => {
     console.log(err);
   });
+});
+
+linkSchema.pre('update', function(next) {
+  console.log('here')
+  this.update({}, {$inc: {visits: 1}}, next);
 });
 
 //------------------------------------------------
@@ -65,11 +76,25 @@ const addLink = (uri, basePath) => {
 const allLinks = () => {
   return new Promise((resolve, reject) => {
     Link.find({},(err, docs) => {
-      console.log('Here are the docs: ' + docs);
       resolve(docs);
+    });
+  });
+};
+
+// const linkExists = () => {
+//   return new Promise((resolve, reject) => {
+//     Link.find()
+//   });
+// };
+
+const clickLink = (codeUrl) => {
+  return new Promise((resolve, reject) => {
+    Link.findOneAndUpdate({'code': codeUrl}, {$push: {'clicks': {timestamp: Date.now()}}}, (err, obj) => {
+      resolve(obj);
     });
   });
 };
 
 module.exports.addLink = addLink;
 module.exports.allLinks = allLinks;
+module.exports.clickLink = clickLink;
