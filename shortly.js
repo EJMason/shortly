@@ -69,8 +69,10 @@ app.post('/links', util.checkUser, (req, res) => {
     console.log('Not a valid url: ', uri);
     return res.sendStatus(404);
   }
-  link.addLink(uri, base);
-  res.status(200).send('Link Created!');
+  else{
+    link.addLink(uri, base);
+    res.status(200).send('Link Created!');
+  }
 });
 
 /************************************************************/
@@ -126,28 +128,11 @@ app.post('/signup', function(req, res) {
 /************************************************************/
 
 app.get('/*', (req, res) => {
-  link.clickLink(req.params[0])
-  .then((obj) =>{
-    return res.redirect(obj.url);
-  });
-  //res.status(200).send('THIS IS HERE!');
-
-  // new Link({ code: req.params[0] }).fetch().then( link => {
-  //   if (!link) {
-  //     res.redirect('/');
-  //   } else {
-  //     var click = new Click({
-  //       linkId: link.get('id')
-  //     });
-
-  //     click.save().then(() => {
-  //       link.set('visits', link.get('visits') + 1);
-  //       link.save().then(() => {
-  //         return res.redirect(link.get('url'));
-  //       });
-  //     });
-  //   }
-  // });
+  console.log('NAVIGATING TO NEW URL!____________');
+  link.onClick(req.params[0]).then(obj => {
+    console.log('NAVIGATING TO NEW URL!')
+    res.redirect(obj.url);
+  })
 });
 
 con.connection.once('open', () => {

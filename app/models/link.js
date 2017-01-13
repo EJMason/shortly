@@ -60,6 +60,8 @@ var Link = mongoose.model('Link', linkSchema);
 //------------------------------------------------
 //                    HELPERS
 //------------------------------------------------
+
+
 const addLink = (uri, basePath) => {
   let newLink = new Link({url: uri, baseUrl: basePath});
   newLink.save()
@@ -87,7 +89,17 @@ const allLinks = () => {
 //   });
 // };
 
-const clickLink = (codeUrl) => {
+const onClick = (codeUrl) => {
+  return new Promise ((resolve, reject) => {
+    addClick(codeUrl).then( link => {
+      return increment(codeUrl);
+    }).then(obj => {
+      resolve(obj);
+    });
+  });
+};
+
+const addClick = (codeUrl) => {
   return new Promise((resolve, reject) => {
     Link.findOneAndUpdate({'code': codeUrl}, {$push: {'clicks': {timestamp: Date.now()}}}, (err, obj) => {
       resolve(obj);
@@ -95,6 +107,14 @@ const clickLink = (codeUrl) => {
   });
 };
 
+const increment = (codeUrl) => {
+  return new Promise ((resolve, reject) => {
+    Link.findOneAndUpdate({'code': codeUrl}, {$inc: {visits: 1}}, (err, obj) => {
+      resolve(obj);
+    });
+  });
+}
+
 module.exports.addLink = addLink;
 module.exports.allLinks = allLinks;
-module.exports.clickLink = clickLink;
+module.exports.onClick = onClick;
